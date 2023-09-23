@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.poseidon.inventory.model.Item;
 import com.poseidon.inventory.repository.ItemRepository;
 import com.poseidon.inventory.service.result.DatabaseOperationResult;
+import com.poseidon.inventory.service.validator.ItemDataValidator;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,13 +19,14 @@ import java.util.Optional;
 @Service
 @Log4j2
 public class ItemService {
+    private final Gson gson = new Gson();
+    private final ItemDataValidator validator = ItemDataValidator.builder().build();
 
     @Autowired
     private ItemRepository itemRepository;
 
     public ResponseEntity<String> saveItem(Item item) {
-        Gson gson = new Gson();
-        DatabaseOperationResult result = verifyItemDataIntegrity(item);
+        DatabaseOperationResult result = validator.verifyItemDataIntegrity(item);
         if (result.getStatus() != HttpStatus.OK.value()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(gson.toJson(result));
         }
@@ -32,34 +34,4 @@ public class ItemService {
         result.setMessage("Item saved successfully.");
         return ResponseEntity.of(Optional.of(gson.toJson(result)));
     }
-
-    private DatabaseOperationResult verifyItemDataIntegrity(Item item) {
-        DatabaseOperationResult result = DatabaseOperationResult.builder().status(HttpStatus.OK.value()).build();
-        List<String> errors = new ArrayList<>();
-        checkNullAttributes(item, errors);
-        if (!errors.isEmpty()) {
-            result.setStatus(HttpStatus.BAD_REQUEST.value());
-            result.setMessage(Map.of("error", errors));
-        }
-        return result;
-    }
-
-    private void checkNullAttributes(Item item, List<String> errors) {
-        List<String> nullAttributes = new ArrayList<>();
-        if (item.getBarcode() == null) {
-            nullAttributes.add("barcode");
-        }
-        if (item.getName() == null) {
-            nullAttributes.add("name");
-        }
-        if (!nullAttributes.isEmpty()) {
-            StringBuilder stringBuilder = new StringBuilder("field {");
-            nullAttributes.forEach(attribute -> {
-                stringBuilder.append(" ").append(attribute).append(" ");
-            });
-            stringBuilder.append("} cannot be null");
-            errors.add(stringBuilder.toString());
-        }
-    }
-
 }

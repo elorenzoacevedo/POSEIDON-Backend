@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -27,4 +29,6 @@ public class Item {
     @Column(name = "quantity", nullable = false)
     private int quantity = 1;
 
+    @Column(name = "price", nullable = false, precision = 12, scale = 2)
+    private BigDecimal price;
 }
