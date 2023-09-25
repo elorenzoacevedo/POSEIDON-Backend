@@ -26,6 +26,9 @@ public class Item {
     @Column(name = "brand", length = 50)
     private String brand;
 
+    @Column(name = "category", length = 50)
+    private String category;
+
     @Column(name = "quantity", nullable = false)
     private int quantity = 1;
 

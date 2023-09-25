@@ -34,6 +34,9 @@ public class ItemDataValidator {
         if (item.getPrice() == null) {
             nullAttributes.add("price");
         }
+        if (item.getCategory() == null) {
+           nullAttributes.add("category");
+        }
 
         if (!nullAttributes.isEmpty()) {
             StringBuilder stringBuilder = new StringBuilder("field { ");
@@ -48,7 +51,7 @@ public class ItemDataValidator {
         if (item.getQuantity() < 0) {
             negativeQuantifiers.add("quantity");
         }
-        if (item.getPrice().floatValue() < 0) {
+        if (item.getPrice() != null && item.getPrice().floatValue() < 0) {
             negativeQuantifiers.add("price");
         }
 
