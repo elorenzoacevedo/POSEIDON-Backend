@@ -12,12 +12,12 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Inheritance( strategy = InheritanceType.TABLE_PER_CLASS)
+@Inheritance( strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "items")
 public class Item {
 
     @Id
-    @Column(name = "barcode")
+    @Column(name = "barcode", updatable = false)
     private String barcode;
 
     @Column(name = "name", nullable = false, length = 50)
