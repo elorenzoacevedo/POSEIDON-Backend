@@ -13,8 +13,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "electronic_devices")
 public class ElectronicDevice extends Item {
-    @Column(name = "serial_number", nullable = false, length = 75)
-    private String serial_number;
+    @Column(name = "serial_number", length = 75)
+    private String serialNumber;
 }

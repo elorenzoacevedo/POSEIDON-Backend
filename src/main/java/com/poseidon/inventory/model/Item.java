@@ -6,16 +6,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
+
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Inheritance( strategy = InheritanceType.TABLE_PER_CLASS)
+@Inheritance( strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "items")
 public class Item {
 
     @Id
-    @Column(name = "barcode")
+    @Column(name = "barcode", updatable = false)
     private String barcode;
 
     @Column(name = "name", nullable = false, length = 50)
@@ -24,7 +26,12 @@ public class Item {
     @Column(name = "brand", length = 50)
     private String brand;
 
+    @Column(name = "category", length = 50)
+    private String category;
+
     @Column(name = "quantity", nullable = false)
     private int quantity = 1;
 
+    @Column(name = "price", nullable = false, precision = 12, scale = 2)
+    private BigDecimal price;
 }
