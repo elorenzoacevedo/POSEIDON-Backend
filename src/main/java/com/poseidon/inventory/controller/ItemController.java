@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/items")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ItemController {
 
     @Autowired
