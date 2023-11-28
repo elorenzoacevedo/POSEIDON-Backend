@@ -1,19 +1,26 @@
 package com.poseidon.inventory.service;
 
-import com.google.gson.Gson;
-import com.poseidon.inventory.model.Item;
-import com.poseidon.inventory.repository.ItemRepository;
-import com.poseidon.inventory.service.result.DatabaseOperationResult;
-import com.poseidon.inventory.service.validator.ItemDataValidator;
-import lombok.extern.log4j.Log4j2;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+import com.google.gson.Gson;
+// import com.google.zxing.BarcodeFormat;
+// import com.google.zxing.WriterException;
+// import com.google.zxing.client.j2se.MatrixToImageWriter;
+// import com.google.zxing.common.BitMatrix;
+// import com.google.zxing.oned.Code128Writer;
+import com.poseidon.inventory.model.Item;
+import com.poseidon.inventory.repository.ItemRepository;
+import com.poseidon.inventory.service.result.DatabaseOperationResult;
+import com.poseidon.inventory.service.validator.ItemDataValidator;
+
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
@@ -22,7 +29,6 @@ public class ItemService {
     private final String NOT_FOUND = "Item not found.";
     private final String DELETED = "Item deleted successfully";
     private final String SAVED = "Item saved successfully";
-    private final String UPDATED = "Item updated successfully";
 
     @Autowired
     private ItemRepository itemRepository;
@@ -67,36 +73,6 @@ public class ItemService {
     }
 
     //Update
-    public ResponseEntity<String> decreaseItemQuantity(int value, String barcode) {
-        DatabaseOperationResult result = DatabaseOperationResult.builder().build();
-        if (value < 0) {
-            result.setStatus(HttpStatus.BAD_REQUEST.value());
-            result.setMessage("Value cannot be negative.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(gson.toJson(result));
-        }
-
-        if (barcode == null) {
-            result.setStatus(HttpStatus.BAD_REQUEST.value());
-            result.setMessage("Barcode cannot be null.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(gson.toJson(result));
-        }
-
-        result = gson.fromJson(findItemById(barcode).getBody(), DatabaseOperationResult.class);
-        if (result.getStatus() != 200) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(gson.toJson(result));
-        }
-
-        Item item = gson.fromJson(gson.toJson(result.getMessage()), Item.class);
-        if (item.getQuantity() < value) {
-            result.setStatus(HttpStatus.BAD_REQUEST.value());
-            result.setMessage(String.format("Item not in sufficient stock (stock: %d).", item.getQuantity()));
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(gson.toJson(result));
-        }
-
-        item.setQuantity(item.getQuantity() - value);
-        return updateItem(barcode, item);
-    }
-
     public ResponseEntity<String> updateItem(String barcode, Item updatedItem) {
         DatabaseOperationResult result = DatabaseOperationResult.builder().build();
         log.info("Updating item with barcode {}...", barcode);
@@ -121,8 +97,8 @@ public class ItemService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(gson.toJson(result));
         }
         itemRepository.save(updatedItem);
-        log.info(UPDATED);
-        result.setMessage(UPDATED);
+        log.info(SAVED);
+        result.setMessage(SAVED);
         return ResponseEntity.of(Optional.of(gson.toJson(result)));
     }
 
@@ -250,4 +226,46 @@ public class ItemService {
                 .build();
         return ResponseEntity.of(Optional.of(gson.toJson(result)));
     }
+
+    //Barcode Generator
+
+    // public void generateBarcodeImage(String fileName) throws WriterException, IOException {
+    //     Random random = new Random();
+    //     String barcodeText;
+    //     do {
+    //         barcodeText = String.format("%012d", random.nextInt(1_000_000_000));
+    //     } while (itemRepository.existsById(barcodeText));
+    
+    //     Code128Writer barcodeWriter = new Code128Writer();
+    
+    //     BitMatrix bitMatrix = barcodeWriter.encode(barcodeText, BarcodeFormat.CODE_128, 1920, 1080);
+    
+    //     // Convert BitMatrix to BufferedImage
+    //     BufferedImage image = MatrixToImageWriter.toBufferedImage(bitMatrix);
+    
+    //     // Create a new image with more space for text
+    //     BufferedImage extendedImage = new BufferedImage(image.getWidth(), image.getHeight() + 60, BufferedImage.TYPE_INT_RGB);
+    //     Graphics2D g = (Graphics2D) extendedImage.getGraphics();
+    
+    //     // Set the background color to white
+    //     g.setColor(Color.WHITE);
+    //     g.fillRect(0, 0, extendedImage.getWidth(), extendedImage.getHeight());
+    
+    //     // Draw the original image on the new image
+    //     g.drawImage(image, 0, 0, null);
+    
+    //     // Add text below the barcode
+    //     g.setColor(Color.BLACK);
+    //     g.setFont(new Font("Arial", Font.PLAIN, 24)); 
+    
+    //     // Calculate the x position to center the text
+    //     int x = (image.getWidth() - g.getFontMetrics().stringWidth(barcodeText)) / 2;
+    
+    //     g.drawString(barcodeText, x, image.getHeight() + 50); // Adjust text position
+    
+    //     // Save the new image
+    //     String directory = "C:\\Users\\Justin Diaz Villa\\Documents\\Invoices\\";
+    //     Path path = FileSystems.getDefault().getPath(directory + fileName + ".png");
+    //     ImageIO.write(extendedImage, "PNG", path.toFile());
+    // }
 }
