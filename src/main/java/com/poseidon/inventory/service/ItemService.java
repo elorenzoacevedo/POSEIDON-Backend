@@ -22,6 +22,7 @@ public class ItemService {
     private final String NOT_FOUND = "Item not found.";
     private final String DELETED = "Item deleted successfully";
     private final String SAVED = "Item saved successfully";
+    private final String UPDATED = "Item updated successfully";
 
     @Autowired
     private ItemRepository itemRepository;
@@ -66,6 +67,36 @@ public class ItemService {
     }
 
     //Update
+    public ResponseEntity<String> decreaseItemQuantity(int value, String barcode) {
+        DatabaseOperationResult result = DatabaseOperationResult.builder().build();
+        if (value < 0) {
+            result.setStatus(HttpStatus.BAD_REQUEST.value());
+            result.setMessage("Value cannot be negative.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(gson.toJson(result));
+        }
+
+        if (barcode == null) {
+            result.setStatus(HttpStatus.BAD_REQUEST.value());
+            result.setMessage("Barcode cannot be null.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(gson.toJson(result));
+        }
+
+        result = gson.fromJson(findItemById(barcode).getBody(), DatabaseOperationResult.class);
+        if (result.getStatus() != 200) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(gson.toJson(result));
+        }
+
+        Item item = gson.fromJson(gson.toJson(result.getMessage()), Item.class);
+        if (item.getQuantity() < value) {
+            result.setStatus(HttpStatus.BAD_REQUEST.value());
+            result.setMessage(String.format("Item not in sufficient stock (stock: %d).", item.getQuantity()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(gson.toJson(result));
+        }
+
+        item.setQuantity(item.getQuantity() - value);
+        return updateItem(barcode, item);
+    }
+
     public ResponseEntity<String> updateItem(String barcode, Item updatedItem) {
         DatabaseOperationResult result = DatabaseOperationResult.builder().build();
         log.info("Updating item with barcode {}...", barcode);
@@ -90,8 +121,8 @@ public class ItemService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(gson.toJson(result));
         }
         itemRepository.save(updatedItem);
-        log.info(SAVED);
-        result.setMessage(SAVED);
+        log.info(UPDATED);
+        result.setMessage(UPDATED);
         return ResponseEntity.of(Optional.of(gson.toJson(result)));
     }
 

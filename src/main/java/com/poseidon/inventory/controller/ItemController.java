@@ -32,6 +32,11 @@ public class ItemController {
         return itemService.updateItem(barcode, item);
     }
 
+    @PostMapping("/decrease-quantity/{barcode}")
+    public ResponseEntity<String> decreaseQuantity(@RequestParam int value, @PathVariable String barcode) {
+        return itemService.decreaseItemQuantity(value, barcode);
+    }
+
     @PostMapping("/electronics/{barcode}")
     public ResponseEntity<String> updateElectronic(@PathVariable String barcode, @RequestBody ElectronicDevice device) {
         return itemService.updateItem(barcode, device);
