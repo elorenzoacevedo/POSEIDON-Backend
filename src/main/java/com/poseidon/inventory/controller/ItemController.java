@@ -42,6 +42,11 @@ public class ItemController {
         return itemService.updateItem(barcode, item);
     }
 
+    @PostMapping("/decrease-quantity/{barcode}")
+    public ResponseEntity<String> decreaseQuantity(@RequestParam int value, @PathVariable String barcode) {
+        return itemService.decreaseItemQuantity(value, barcode);
+    }
+
     @PostMapping("/electronics/{barcode}")
     public ResponseEntity<String> updateElectronic(@PathVariable String barcode, @RequestBody ElectronicDevice device) {
         return itemService.updateItem(barcode, device);
@@ -112,19 +117,22 @@ public class ItemController {
         return itemService.deleteItem(barcode);
     }
 
-// @GetMapping("/generate-barcode/{fileName}")
-// public ResponseEntity<String> generateBarcodeImage(@PathVariable String fileName) {
-//     try {
-//         itemService.generateBarcodeImage(fileName);
-//         return ResponseEntity.ok("Barcode image generated successfully");
-//     } catch (WriterException e) {
-//         e.printStackTrace();
-//         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating barcode image");
-//     }
-//     catch (IOException e) {
-//         e.printStackTrace();
-//         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating barcode image");
-//     }
-// }
+    // @GetMapping("/generate-barcode/{fileName}")
+    // public ResponseEntity<String> generateBarcodeImage(@PathVariable String
+    // fileName) {
+    // try {
+    // itemService.generateBarcodeImage(fileName);
+    // return ResponseEntity.ok("Barcode image generated successfully");
+    // } catch (WriterException e) {
+    // e.printStackTrace();
+    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error
+    // generating barcode image");
+    // }
+    // catch (IOException e) {
+    // e.printStackTrace();
+    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error
+    // generating barcode image");
+    // }
+    // }
 
 }

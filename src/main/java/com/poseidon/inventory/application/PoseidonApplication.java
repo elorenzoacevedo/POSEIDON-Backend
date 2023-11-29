@@ -14,6 +14,4 @@ public class PoseidonApplication {
 		SpringApplication.run(PoseidonApplication.class, args);
 	}
 
-	
-
 }
