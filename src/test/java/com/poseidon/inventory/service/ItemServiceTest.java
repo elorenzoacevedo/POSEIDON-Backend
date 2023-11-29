@@ -25,6 +25,7 @@ import com.poseidon.inventory.repository.ItemRepository;
 import com.poseidon.inventory.service.result.DatabaseOperationResult;
 
 public class ItemServiceTest {
+
     @Mock
     private ItemRepository itemRepository;
 
@@ -170,4 +171,5 @@ public class ItemServiceTest {
 
         assertEquals(item, resultItem);
     }
+
 }

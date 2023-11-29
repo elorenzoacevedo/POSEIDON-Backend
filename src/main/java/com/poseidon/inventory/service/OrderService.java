@@ -73,7 +73,6 @@ public class OrderService {
 
         return ResponseEntity.status(status).body(result);
     }
-
     // Warning. This operation will delete all the orders in the entity.
     public ResponseEntity<String> deleteAllOrders() {
         log.info("Deleting all orders...");
@@ -199,7 +198,6 @@ public class OrderService {
                 cell.setFixedHeight(30);
                 table.addCell(cell);
             }
-
             // Add total amount
             PdfPCell cell = new PdfPCell(new Phrase("Total:"));
             cell.setColspan(3);
@@ -218,7 +216,6 @@ public class OrderService {
             Paragraph orderDate = new Paragraph("Order Date: " + order.getDate());
             orderDate.setAlignment(Element.ALIGN_RIGHT);
             document.add(orderDate);
-
             document.close();
             return ResponseEntity.ok("Invoice generated successfully");
         } catch (Exception e) {

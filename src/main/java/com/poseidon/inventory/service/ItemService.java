@@ -122,8 +122,8 @@ public class ItemService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(gson.toJson(result));
         }
         itemRepository.save(updatedItem);
-        log.info(UPDATED);
-        result.setMessage(UPDATED);
+        log.info(SAVED);
+        result.setMessage(SAVED);
         return ResponseEntity.of(Optional.of(gson.toJson(result)));
     }
 

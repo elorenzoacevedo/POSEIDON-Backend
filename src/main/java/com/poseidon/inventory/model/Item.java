@@ -36,10 +36,10 @@ public class Item implements Serializable {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Column(name = "brand", length = 50)
+    @Column(name = "brand", length = 50, nullable = false)
     private String brand;
 
-    @Column(name = "category", length = 50)
+    @Column(name = "category", length = 50, nullable = false)
     private String category;
 
     @Column(name = "quantity", nullable = false)

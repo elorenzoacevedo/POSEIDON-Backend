@@ -1,13 +1,23 @@
 package com.poseidon.inventory.controller;
 
+import java.math.BigDecimal;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+// import com.google.zxing.WriterException;
 import com.poseidon.inventory.model.ElectronicDevice;
 import com.poseidon.inventory.model.Item;
 import com.poseidon.inventory.service.ItemService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/items")
@@ -30,11 +40,6 @@ public class ItemController {
     @PostMapping("/{barcode}")
     public ResponseEntity<String> updateItem(@PathVariable String barcode, @RequestBody Item item) {
         return itemService.updateItem(barcode, item);
-    }
-
-    @PostMapping("/decrease-quantity/{barcode}")
-    public ResponseEntity<String> decreaseQuantity(@RequestParam int value, @PathVariable String barcode) {
-        return itemService.decreaseItemQuantity(value, barcode);
     }
 
     @PostMapping("/electronics/{barcode}")
@@ -106,5 +111,20 @@ public class ItemController {
     public ResponseEntity<String> removeItem(@PathVariable String barcode) {
         return itemService.deleteItem(barcode);
     }
+
+// @GetMapping("/generate-barcode/{fileName}")
+// public ResponseEntity<String> generateBarcodeImage(@PathVariable String fileName) {
+//     try {
+//         itemService.generateBarcodeImage(fileName);
+//         return ResponseEntity.ok("Barcode image generated successfully");
+//     } catch (WriterException e) {
+//         e.printStackTrace();
+//         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating barcode image");
+//     }
+//     catch (IOException e) {
+//         e.printStackTrace();
+//         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating barcode image");
+//     }
+// }
 
 }
