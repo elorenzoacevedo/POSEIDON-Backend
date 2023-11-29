@@ -163,7 +163,7 @@ public class ItemService {
         List<Item> items = itemRepository.findByBrand(brand);
         DatabaseOperationResult result = DatabaseOperationResult.builder()
                 .status(HttpStatus.OK.value())
-                .message(items)
+                .message(items) 
                 .build();
         return ResponseEntity.of(Optional.of(gson.toJson(result)));
     }
