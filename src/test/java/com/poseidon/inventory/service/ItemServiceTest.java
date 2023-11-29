@@ -1,9 +1,16 @@
 package com.poseidon.inventory.service;
 
-import com.google.gson.Gson;
-import com.poseidon.inventory.model.Item;
-import com.poseidon.inventory.repository.ItemRepository;
-import com.poseidon.inventory.service.result.DatabaseOperationResult;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -11,11 +18,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import com.google.gson.Gson;
+import com.poseidon.inventory.model.Item;
+import com.poseidon.inventory.model.Purchase;
+import com.poseidon.inventory.repository.ItemRepository;
+import com.poseidon.inventory.service.result.DatabaseOperationResult;
 
 public class ItemServiceTest {
     @Mock
@@ -33,8 +40,15 @@ public class ItemServiceTest {
 
     @Test
     public void saveItem_shouldReturnSuccessStatusCode_whenInputItemIsValid() {
-        Item item = new Item("12345", "testItem", "someBrand",
-                "testCategory", 2, new BigDecimal(4));
+        Set<Purchase> purchases = new HashSet<>();
+        Item item = new Item();
+        item.setBarcode("12345");
+        item.setName("testItem");
+        item.setBrand("someBrand");
+        item.setCategory("testCategory");
+        item.setQuantity(2);
+        item.setPrice(new BigDecimal(4));
+        item.setPurchases(purchases);
         when(itemRepository.save(item)).thenReturn(item);
         ResponseEntity<String> response = itemService.saveItem(item);
 
@@ -43,8 +57,16 @@ public class ItemServiceTest {
 
     @Test
     public void saveItem_shouldReturnBadRequestStatusCode_whenInputItemIsNotValid() {
-        Item item = new Item("12345", null, "someBrand",
-                "testCategory", 2, new BigDecimal(4));
+        Set<Purchase> purchases = new HashSet<>();
+
+        Item item = new Item();
+        item.setBarcode("12345");
+        item.setName(null);
+        item.setBrand("someBrand");
+        item.setCategory("testCategory");
+        item.setQuantity(2);
+        item.setPrice(new BigDecimal(4));
+        item.setPurchases(purchases);
         when(itemRepository.save(item)).thenReturn(item);
         ResponseEntity<String> response = itemService.saveItem(item);
 
@@ -102,8 +124,16 @@ public class ItemServiceTest {
     @Test
     public void updateItem_shouldSaveItem_whenItemAndBarcodeAreValid() {
         String barcode = "testBarcode";
-        Item item = new Item("testBarcode", "testItem", "someBrand",
-                "testCategory", 2, new BigDecimal(4));
+        Set<Purchase> purchases = new HashSet<>();
+
+        Item item = new Item();
+        item.setBarcode("testBarcode");
+        item.setName("testItem");
+        item.setBrand("someBrand");
+        item.setCategory("testCategory");
+        item.setQuantity(2);
+        item.setPrice(new BigDecimal(4));
+        item.setPurchases(purchases);
         when(itemRepository.existsById(barcode)).thenReturn(true);
         itemService.updateItem(barcode, item);
 
@@ -122,8 +152,15 @@ public class ItemServiceTest {
 
     @Test
     public void findItemById_shouldReturnItem_ifItemIsFound() {
-        Item item = new Item("12345", null, "someBrand",
-                "testCategory", 2, new BigDecimal(4));
+        Set<Purchase> purchases = new HashSet<>();
+        Item item = new Item();
+        item.setBarcode("12345");
+        item.setName(null);
+        item.setBrand("someBrand");
+        item.setCategory("testCategory");
+        item.setQuantity(2);
+        item.setPrice(new BigDecimal(4));
+        item.setPurchases(purchases);
         String barcode = "12345";
         when(itemRepository.findById(barcode)).thenReturn(Optional.of(item));
         ResponseEntity<String> response = itemService.findItemById(barcode);

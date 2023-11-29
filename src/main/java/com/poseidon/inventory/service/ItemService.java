@@ -1,19 +1,21 @@
 package com.poseidon.inventory.service;
 
-import com.google.gson.Gson;
-import com.poseidon.inventory.model.Item;
-import com.poseidon.inventory.repository.ItemRepository;
-import com.poseidon.inventory.service.result.DatabaseOperationResult;
-import com.poseidon.inventory.service.validator.ItemDataValidator;
-import lombok.extern.log4j.Log4j2;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+import com.google.gson.Gson;
+import com.poseidon.inventory.model.Item;
+import com.poseidon.inventory.repository.ItemRepository;
+import com.poseidon.inventory.service.result.DatabaseOperationResult;
+import com.poseidon.inventory.service.validator.ItemDataValidator;
+
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
@@ -27,7 +29,7 @@ public class ItemService {
     @Autowired
     private ItemRepository itemRepository;
 
-    //Create
+    // Create
     public ResponseEntity<String> saveItem(Item item) {
         ItemDataValidator validator = ItemDataValidator.builder().build();
         DatabaseOperationResult result = validator.verifyItemDataIntegrity(item);
@@ -46,7 +48,7 @@ public class ItemService {
         return ResponseEntity.of(Optional.of(gson.toJson(result)));
     }
 
-    //Delete
+    // Delete
     public ResponseEntity<String> deleteItem(String barcode) {
         DatabaseOperationResult result = DatabaseOperationResult.builder().build();
         HttpStatus status;
@@ -55,8 +57,7 @@ public class ItemService {
             result.setMessage(NOT_FOUND);
             log.info(NOT_FOUND);
             status = HttpStatus.NOT_FOUND;
-        }
-        else {
+        } else {
             itemRepository.deleteById(barcode);
             result.setMessage(DELETED);
             log.info(DELETED);
@@ -66,7 +67,7 @@ public class ItemService {
         return ResponseEntity.status(status).body(gson.toJson(result));
     }
 
-    //Update
+    // Update
     public ResponseEntity<String> decreaseItemQuantity(int value, String barcode) {
         DatabaseOperationResult result = DatabaseOperationResult.builder().build();
         if (value < 0) {
@@ -126,7 +127,7 @@ public class ItemService {
         return ResponseEntity.of(Optional.of(gson.toJson(result)));
     }
 
-    //Read
+    // Read
     public ResponseEntity<String> findAllItems() {
         DatabaseOperationResult result = DatabaseOperationResult.builder().status(HttpStatus.OK.value()).build();
         result.setMessage(itemRepository.findAll());
@@ -250,4 +251,48 @@ public class ItemService {
                 .build();
         return ResponseEntity.of(Optional.of(gson.toJson(result)));
     }
+    // Barcode Generator
+
+    // public void generateBarcodeImage(String fileName) throws WriterException,
+    // IOException {
+    // Random random = new Random();
+    // String barcodeText;
+    // do {
+    // barcodeText = String.format("%012d", random.nextInt(1_000_000_000));
+    // } while (itemRepository.existsById(barcodeText));
+
+    // Code128Writer barcodeWriter = new Code128Writer();
+
+    // BitMatrix bitMatrix = barcodeWriter.encode(barcodeText,
+    // BarcodeFormat.CODE_128, 1920, 1080);
+
+    // // Convert BitMatrix to BufferedImage
+    // BufferedImage image = MatrixToImageWriter.toBufferedImage(bitMatrix);
+
+    // // Create a new image with more space for text
+    // BufferedImage extendedImage = new BufferedImage(image.getWidth(),
+    // image.getHeight() + 60, BufferedImage.TYPE_INT_RGB);
+    // Graphics2D g = (Graphics2D) extendedImage.getGraphics();
+
+    // // Set the background color to white
+    // g.setColor(Color.WHITE);
+    // g.fillRect(0, 0, extendedImage.getWidth(), extendedImage.getHeight());
+
+    // // Draw the original image on the new image
+    // g.drawImage(image, 0, 0, null);
+
+    // // Add text below the barcode
+    // g.setColor(Color.BLACK);
+    // g.setFont(new Font("Arial", Font.PLAIN, 24));
+
+    // // Calculate the x position to center the text
+    // int x = (image.getWidth() - g.getFontMetrics().stringWidth(barcodeText)) / 2;
+
+    // g.drawString(barcodeText, x, image.getHeight() + 50); // Adjust text position
+
+    // // Save the new image
+    // String directory = "C:\\Users\\Justin Diaz Villa\\Documents\\Invoices\\";
+    // Path path = FileSystems.getDefault().getPath(directory + fileName + ".png");
+    // ImageIO.write(extendedImage, "PNG", path.toFile());
+    // }
 }

@@ -1,20 +1,33 @@
 package com.poseidon.inventory.model;
 
-import jakarta.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-
-import java.math.BigDecimal;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Inheritance( strategy = InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "items")
-public class Item {
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "barcode")
+public class Item implements Serializable {
 
     @Id
     @Column(name = "barcode", updatable = false)
@@ -34,4 +47,7 @@ public class Item {
 
     @Column(name = "price", nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
+
+    @OneToMany(mappedBy = "item", cascade = { CascadeType.REMOVE })
+    private Set<Purchase> purchases = new HashSet<>();
 }
