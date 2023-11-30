@@ -1,8 +1,11 @@
 package com.poseidon.inventory.controller;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 
+import com.google.zxing.WriterException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -117,22 +120,17 @@ public class ItemController {
         return itemService.deleteItem(barcode);
     }
 
-    // @GetMapping("/generate-barcode/{fileName}")
-    // public ResponseEntity<String> generateBarcodeImage(@PathVariable String
-    // fileName) {
-    // try {
-    // itemService.generateBarcodeImage(fileName);
-    // return ResponseEntity.ok("Barcode image generated successfully");
-    // } catch (WriterException e) {
-    // e.printStackTrace();
-    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error
-    // generating barcode image");
-    // }
-    // catch (IOException e) {
-    // e.printStackTrace();
-    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error
-    // generating barcode image");
-    // }
-    // }
-
+    @GetMapping("/generate-barcode/{fileName}")
+    public ResponseEntity<String> generateBarcodeImage(@PathVariable String fileName) {
+        try {
+            itemService.generateBarcodeImage(fileName);
+            return ResponseEntity.ok("Barcode image generated successfully");
+        } catch (WriterException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating barcode image");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating barcode image");
+        }
+    }
 }

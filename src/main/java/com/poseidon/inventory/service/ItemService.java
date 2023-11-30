@@ -1,9 +1,21 @@
 package com.poseidon.inventory.service;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.oned.Code128Writer;
+import com.poseidon.inventory.service.print.Printer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +29,8 @@ import com.poseidon.inventory.service.validator.ItemDataValidator;
 
 import lombok.extern.log4j.Log4j2;
 
+import javax.imageio.ImageIO;
+
 @Service
 @Log4j2
 public class ItemService {
@@ -25,6 +39,7 @@ public class ItemService {
     private final String DELETED = "Item deleted successfully";
     private final String SAVED = "Item saved successfully";
     private final String UPDATED = "Item updated successfully";
+    private final Printer printer = new Printer();
 
     @Autowired
     private ItemRepository itemRepository;
@@ -163,7 +178,7 @@ public class ItemService {
         List<Item> items = itemRepository.findByBrand(brand);
         DatabaseOperationResult result = DatabaseOperationResult.builder()
                 .status(HttpStatus.OK.value())
-                .message(items) 
+                .message(items)
                 .build();
         return ResponseEntity.of(Optional.of(gson.toJson(result)));
     }
@@ -253,46 +268,54 @@ public class ItemService {
     }
     // Barcode Generator
 
-    // public void generateBarcodeImage(String fileName) throws WriterException,
-    // IOException {
-    // Random random = new Random();
-    // String barcodeText;
-    // do {
-    // barcodeText = String.format("%012d", random.nextInt(1_000_000_000));
-    // } while (itemRepository.existsById(barcodeText));
+    public void generateBarcodeImage(String fileName) throws WriterException, IOException {
+        Random random = new Random();
+        String barcodeText;
+        do {
+            barcodeText = String.format("%012d", random.nextInt(1_000_000_000));
+        } while (itemRepository.existsById(barcodeText));
 
-    // Code128Writer barcodeWriter = new Code128Writer();
+        Code128Writer barcodeWriter = new Code128Writer();
 
-    // BitMatrix bitMatrix = barcodeWriter.encode(barcodeText,
-    // BarcodeFormat.CODE_128, 1920, 1080);
+        // Set the desired size for the barcode
+        int barcodeWidth = 300; // 1.5 inches at 200 DPI
+        int barcodeHeight = 150; // 1 inch at 200 DPI
 
-    // // Convert BitMatrix to BufferedImage
-    // BufferedImage image = MatrixToImageWriter.toBufferedImage(bitMatrix);
+        BitMatrix bitMatrix = barcodeWriter.encode(barcodeText, BarcodeFormat.CODE_128, barcodeWidth, barcodeHeight);
 
-    // // Create a new image with more space for text
-    // BufferedImage extendedImage = new BufferedImage(image.getWidth(),
-    // image.getHeight() + 60, BufferedImage.TYPE_INT_RGB);
-    // Graphics2D g = (Graphics2D) extendedImage.getGraphics();
+        // Convert BitMatrix to BufferedImage
+        BufferedImage image = MatrixToImageWriter.toBufferedImage(bitMatrix);
 
-    // // Set the background color to white
-    // g.setColor(Color.WHITE);
-    // g.fillRect(0, 0, extendedImage.getWidth(), extendedImage.getHeight());
+        // Create a new image with more space for text
+        BufferedImage extendedImage = new BufferedImage(image.getWidth(), image.getHeight() + 60, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = (Graphics2D) extendedImage.getGraphics();
 
-    // // Draw the original image on the new image
-    // g.drawImage(image, 0, 0, null);
+        // Set the background color to white
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, extendedImage.getWidth(), extendedImage.getHeight());
 
-    // // Add text below the barcode
-    // g.setColor(Color.BLACK);
-    // g.setFont(new Font("Arial", Font.PLAIN, 24));
+        // Draw the original image on the new image
+        g.drawImage(image, 0, 0, null);
 
-    // // Calculate the x position to center the text
-    // int x = (image.getWidth() - g.getFontMetrics().stringWidth(barcodeText)) / 2;
+        // Add text below the barcode
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.PLAIN, 10));
+        // Calculate the x position to center the text
+        int x = (image.getWidth() - g.getFontMetrics().stringWidth(barcodeText)) / 2;
 
-    // g.drawString(barcodeText, x, image.getHeight() + 50); // Adjust text position
+        g.drawString(barcodeText, x, image.getHeight() + 25); // Adjust text position
 
-    // // Save the new image
-    // String directory = "C:\\Users\\Justin Diaz Villa\\Documents\\Invoices\\";
-    // Path path = FileSystems.getDefault().getPath(directory + fileName + ".png");
-    // ImageIO.write(extendedImage, "PNG", path.toFile());
-    // }
+        // Save the new image
+        String directory = "C:\\Barcodes\\";
+        Path path = FileSystems.getDefault().getPath(directory + fileName + ".png");
+        ImageIO.write(extendedImage, "PNG", path.toFile());
+
+        // Print
+        printer.printPNG(path);
+
+        if (!path.toFile().delete()) {
+            log.error("Error deleting barcode image for file: {}", path);
+        }
+    }
+
 }

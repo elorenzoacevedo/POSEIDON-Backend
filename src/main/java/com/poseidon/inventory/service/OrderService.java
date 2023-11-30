@@ -1,12 +1,15 @@
 package com.poseidon.inventory.service;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.poseidon.inventory.service.print.Printer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +37,7 @@ public class OrderService {
     private final String NOT_FOUND = "Order not found.";
     private final String DELETED = "Order deleted successfully";
     private final String SAVED = "Order saved successfully";
+    private final Printer printer = new Printer();
 
     @Autowired
     private OrderRepository orderRepository;
@@ -133,8 +137,8 @@ public class OrderService {
     // Invoice Generator
     public ResponseEntity<String> generateInvoicePdf(Long orderNumber) {
         Optional<Order> orderOpt = orderRepository.findById(orderNumber);
-        if (!orderOpt.isPresent()) {
-            log.info(NOT_FOUND, orderNumber);
+        if (orderOpt.isEmpty()) {
+            log.info(NOT_FOUND + ": {}", orderNumber);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(NOT_FOUND);
         }
 
@@ -143,7 +147,7 @@ public class OrderService {
         try {
             Document document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(
-                    "C:\\Users\\Justin Diaz Villa\\Documents\\Invoices\\Invoice_" + orderNumber + ".pdf"));
+                    "C:\\Invoices\\Invoice_" + orderNumber + ".pdf"));
             document.open();
 
             // Create a new font object
@@ -217,6 +221,9 @@ public class OrderService {
             orderDate.setAlignment(Element.ALIGN_RIGHT);
             document.add(orderDate);
             document.close();
+            Path invoice = Path.of("C:\\Invoices\\Invoice_" + orderNumber + ".pdf");
+            //Print
+            printer.printPDF(invoice);
             return ResponseEntity.ok("Invoice generated successfully");
         } catch (Exception e) {
             log.error("Error generating invoice PDF", e);
